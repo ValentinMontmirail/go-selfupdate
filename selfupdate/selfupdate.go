@@ -165,7 +165,7 @@ func (u *Updater) UpdateAvailable() (string, error) {
 	}
 	defer old.Close()
 
-	err = u.fetchInfo()
+	err = u.FetchInfo()
 	if err != nil {
 		return "", err
 	}
@@ -188,7 +188,7 @@ func (u *Updater) Update() error {
 	}
 
 	// go fetch latest updates manifest
-	err = u.fetchInfo()
+	err = u.FetchInfo()
 	if err != nil {
 		return err
 	}
@@ -204,7 +204,7 @@ func (u *Updater) Update() error {
 	}
 	defer old.Close()
 
-	bin, err := u.fetchAndVerifyPatch(old)
+	bin, err := u.FetchAndVerifyPatch(old)
 	if err != nil {
 		if err == ErrHashMismatch {
 			log.Println("update: hash mismatch from patched binary")
@@ -215,7 +215,7 @@ func (u *Updater) Update() error {
 		}
 
 		// if patch failed grab the full new bin
-		bin, err = u.fetchAndVerifyFullBin()
+		bin, err = u.FetchAndVerifyFullBin()
 		if err != nil {
 			if err == ErrHashMismatch {
 				log.Println("update: hash mismatch from full binary")
@@ -308,9 +308,9 @@ func fromStream(updateWith io.Reader) (err error, errRecover error) {
 	return
 }
 
-// fetchInfo fetches the update JSON manifest at u.ApiURL/appname/platform.json
+// FetchInfo fetches the update JSON manifest at u.ApiURL/appname/platform.json
 // and updates u.Info.
-func (u *Updater) fetchInfo() error {
+func (u *Updater) FetchInfo() error {
 	r, err := u.fetch(u.ApiURL + url.QueryEscape(u.CmdName) + "/" + url.QueryEscape(plat) + ".json")
 	if err != nil {
 		return err
@@ -326,7 +326,7 @@ func (u *Updater) fetchInfo() error {
 	return nil
 }
 
-func (u *Updater) fetchAndVerifyPatch(old io.Reader) ([]byte, error) {
+func (u *Updater) FetchAndVerifyPatch(old io.Reader) ([]byte, error) {
 	bin, err := u.fetchAndApplyPatch(old)
 	if err != nil {
 		return nil, err
@@ -348,7 +348,7 @@ func (u *Updater) fetchAndApplyPatch(old io.Reader) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-func (u *Updater) fetchAndVerifyFullBin() ([]byte, error) {
+func (u *Updater) FetchAndVerifyFullBin() ([]byte, error) {
 	bin, err := u.fetchBin()
 	if err != nil {
 		return nil, err
